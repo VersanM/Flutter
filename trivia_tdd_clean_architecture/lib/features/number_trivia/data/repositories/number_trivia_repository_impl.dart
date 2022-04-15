@@ -8,7 +8,7 @@ import 'package:trivia_tdd_clean_architecture/features/number_trivia/data/models
 import 'package:trivia_tdd_clean_architecture/features/number_trivia/domain/entities/number_trivia.dart';
 import 'package:trivia_tdd_clean_architecture/features/number_trivia/domain/repositories/number_trivia_repository.dart';
 
-typedef Future<NumberTrivia> _ConcreteOrRandomChooser();
+typedef Future<NumberTriviaModel> _ConcreteOrRandomChooser();
 
 class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
   final NumberTriviaRemoteDataSource remoteDataSource;
@@ -25,7 +25,7 @@ class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
   Future<Either<Failure, NumberTrivia>> getConcreteNumberTrivia(
       int number) async {
     return await _getTrivia(() {
-      return remoteDataSource.getConcreteNumberTrivia(number);
+      return remoteDataSource.getConcreteNumberTrivia(number)!;
     });
   }
 
@@ -41,7 +41,7 @@ class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
     if (await networkInfo.isConnected) {
       try {
         final remoteTrivia = await getConcreteOrRandom();
-        localDataSource.cacheNumberTrivia(NumberTriviaModel(text: remoteTrivia.text, number: remoteTrivia.number));
+        localDataSource.cacheNumberTrivia(remoteTrivia);
         return Right(remoteTrivia);
       } on ServerException {
         return Left(ServerFailure());
@@ -49,7 +49,7 @@ class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
     } else {
       try {
         final localTrivia = await localDataSource.getLastNumberTrivia();
-        return Right(localTrivia);
+        return Right(localTrivia!);
       } on CacheException {
         return Left(CacheFailure());
       }

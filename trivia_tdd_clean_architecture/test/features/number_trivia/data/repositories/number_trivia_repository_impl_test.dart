@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trivia_tdd_clean_architecture/core/error/exceptions.dart';
@@ -10,21 +11,26 @@ import 'package:trivia_tdd_clean_architecture/features/number_trivia/data/models
 import 'package:trivia_tdd_clean_architecture/features/number_trivia/data/repositories/number_trivia_repository_impl.dart';
 import 'package:trivia_tdd_clean_architecture/features/number_trivia/domain/entities/number_trivia.dart';
 
-class MockRemoteDataSource extends Mock
-    implements NumberTriviaRemoteDataSource {}
+import 'number_trivia_repository_impl_test.mocks.dart';
 
 class MockLocalDataSource extends Mock implements NumberTriviaLocalDataSource {}
 
-class MockNetworkInfo extends Mock implements NetworkInfo {}
-
+@GenerateMocks([NetworkInfo])
+@GenerateMocks([
+  NumberTriviaRemoteDataSource
+], customMocks: [
+  MockSpec<NumberTriviaRemoteDataSource>(
+      as: #MockNumberTriviaRemoteDataSourceForTest,
+      returnNullOnMissingStub: true),
+])
 void main() {
   late NumberTriviaRepositoryImpl repository;
-  late MockRemoteDataSource mockRemoteDataSource;
+  late MockNumberTriviaRemoteDataSource mockRemoteDataSource;
   late MockLocalDataSource mockLocalDataSource;
   late MockNetworkInfo mockNetworkInfo;
 
   setUp(() {
-    mockRemoteDataSource = MockRemoteDataSource();
+    mockRemoteDataSource = MockNumberTriviaRemoteDataSource();
     mockLocalDataSource = MockLocalDataSource();
     mockNetworkInfo = MockNetworkInfo();
     repository = NumberTriviaRepositoryImpl(
@@ -60,9 +66,10 @@ void main() {
     final NumberTrivia tNumberTrivia = tNumberTriviaModel;
 
     test('should check if the device is online', () async {
+      when(mockRemoteDataSource.getConcreteNumberTrivia(any)).thenAnswer((_) async => tNumberTriviaModel);
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
       // act
-      repository.getConcreteNumberTrivia(1);
+      repository.getConcreteNumberTrivia(tNumber);
       // assert
       verify(mockNetworkInfo.isConnected);
     });
@@ -142,6 +149,7 @@ void main() {
     final NumberTrivia tNumberTrivia = tNumberTriviaModel;
 
     test('should check if the device is online', () async {
+      when(mockRemoteDataSource.getRandomNumberTrivia()).thenAnswer((_) async => tNumberTriviaModel);
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
       // act
       repository.getRandomNumberTrivia();
