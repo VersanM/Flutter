@@ -13,33 +13,12 @@ import 'package:trivia_tdd_clean_architecture/features/number_trivia/presentatio
 import 'package:http/http.dart' as http;
 
 final sl = GetIt.instance;
-
 Future<void> init() async {
-  /** Features - Number trivia */
-  initFeatures();
-  /** Core */
-  sl.registerLazySingleton(() => InputConverter());
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(
-      sl(),
-    ),
-  );
-  /** External */
-  final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton(() async => sharedPreferences);
-  sl.registerLazySingleton(() async => http.Client());
-  sl.registerLazySingleton(() async => InternetConnectionChecker());
-}
-
-void initFeatures() {
-  // Bloc
-  sl.registerFactory(
-    () => NumberTriviaBloc(
+  //! Features - NumberTrivia
+  sl.registerFactory(() => NumberTriviaBloc(
       getConcreteNumberTrivia: sl(),
       getRandomNumberTrivia: sl(),
-      inputConverter: sl(),
-    ),
-  );
+      inputConverter: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetConcreteNumberTrivia(sl()));
@@ -47,22 +26,77 @@ void initFeatures() {
 
   // Repository
   sl.registerLazySingleton<NumberTriviaRepository>(
-    () => NumberTriviaRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-      networkInfo: sl(),
-    ),
-  );
-
+          () => NumberTriviaRepositoryImpl(
+        remoteDataSource: sl(),
+        localDataSource: sl(),
+        networkInfo: sl(),
+      ));
   // Data sources
   sl.registerLazySingleton<NumberTriviaRemoteDataSource>(
-    () => NumberTriviaRemoteDataSourceImpl(
-      client: sl(),
-    ),
-  );
+          () => NumberTriviaRemoteDataSourceImpl(client: sl()));
+
   sl.registerLazySingleton<NumberTriviaLocalDataSource>(
-    () => NumberTriviaLocalDataSourceImpl(
-      sharedPreferences: sl(),
-    ),
-  );
+          () => NumberTriviaLocalDataSourceImpl(sharedPreferences: sl()));
+
+  //! Core
+  sl.registerLazySingleton(() => InputConverter());
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+
+  //! External
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => InternetConnectionChecker());
 }
+// Future<void> init() async {
+//   /** Features - Number trivia */
+//   initFeatures();
+//   /** Core */
+//   sl.registerLazySingleton(() => InputConverter());
+//   sl.registerLazySingleton<NetworkInfo>(
+//     () => NetworkInfoImpl(
+//       sl(),
+//     ),
+//   );
+//   /** External */
+//   final sharedPreferences = await SharedPreferences.getInstance();
+//   sl.registerLazySingleton(() async => sharedPreferences);
+//   sl.registerLazySingleton(() async => http.Client());
+//   sl.registerLazySingleton(() async => InternetConnectionChecker());
+// }
+
+// void initFeatures() {
+//   // Bloc
+//   sl.registerFactory(
+//     () => NumberTriviaBloc(
+//       getConcreteNumberTrivia: sl(),
+//       getRandomNumberTrivia: sl(),
+//       inputConverter: sl(),
+//     ),
+//   );
+//
+//   // Use cases
+//   sl.registerLazySingleton(() => GetConcreteNumberTrivia(sl()));
+//   sl.registerLazySingleton(() => GetRandomNumberTrivia(sl()));
+//
+//   // Repository
+//   sl.registerLazySingleton<NumberTriviaRepository>(
+//     () => NumberTriviaRepositoryImpl(
+//       remoteDataSource: sl(),
+//       localDataSource: sl(),
+//       networkInfo: sl(),
+//     ),
+//   );
+//
+//   // Data sources
+//   sl.registerLazySingleton<NumberTriviaRemoteDataSource>(
+//     () => NumberTriviaRemoteDataSourceImpl(
+//       client: sl(),
+//     ),
+//   );
+//   sl.registerLazySingleton<NumberTriviaLocalDataSource>(
+//     () => NumberTriviaLocalDataSourceImpl(
+//       sharedPreferences: sl(),
+//     ),
+//   );
+// }
